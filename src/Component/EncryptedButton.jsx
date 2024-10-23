@@ -5,11 +5,12 @@ const letters = "abcdefghijklmnopqrstuvwxyz-.,+*!?@&%/=";
 const loopDelay = 1000;
 const initDelay = 100;
 
-const EncryptedButton = ({ text, revealSpeed = 50, loop = false }) => {
+const EncryptedButton = ({ text, revealSpeed = 50, loop = false, styles = {} }) => {
   const [displayText, setDisplayText] = useState(text);
   const [isHovering, setIsHovering] = useState(false);
   const [iteration, setIteration] = useState(0);
   const intervalRef = useRef(null);
+  const [buttonState, setButtonState] = useState('base');
 
   const encrypt = (iteration) => {
     return text
@@ -60,11 +61,25 @@ const EncryptedButton = ({ text, revealSpeed = 50, loop = false }) => {
     }
   }, [iteration, text, isHovering]);
 
+  const buttonStyle = {
+    ...styles.base,
+    ...(buttonState === 'hover' ? styles.hover : {}),
+    ...(buttonState === 'active' ? styles.active : {}),
+  };
+
   return (
     <button
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
-      style={{ fontFamily: 'monospace', padding: '10px', fontSize: '16px' }}
+      onMouseEnter={() => {
+        setIsHovering(true);
+        setButtonState('hover');
+      }}
+      onMouseLeave={() => {
+        setIsHovering(false);
+        setButtonState('base');
+      }}
+      onMouseDown={() => setButtonState('active')}
+      onMouseUp={() => setButtonState('hover')}
+      style={buttonStyle}
     >
       {displayText}
     </button>
@@ -75,6 +90,11 @@ EncryptedButton.propTypes = {
   text: PropTypes.string.isRequired,
   revealSpeed: PropTypes.number,
   loop: PropTypes.bool,
+  styles: PropTypes.shape({
+    base: PropTypes.object,
+    hover: PropTypes.object,
+    active: PropTypes.object,
+  }),
 };
 
 export default EncryptedButton;
